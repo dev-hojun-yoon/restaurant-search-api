@@ -15,12 +15,12 @@ public class UserPointTable {
 
     private final Map<Long, UserPoint> table = new HashMap<>();
 
-    public UserPoint selectById(Long id) {
+    public synchronized UserPoint selectById(Long id) {
         throttle(200);
         return table.getOrDefault(id, UserPoint.empty(id));
     }
 
-    public UserPoint insertOrUpdate(long id, long amount) {
+    public synchronized UserPoint insertOrUpdate(long id, long amount) {
         throttle(300);
         UserPoint userPoint = new UserPoint(id, amount, System.currentTimeMillis());
         table.put(id, userPoint);
