@@ -26,11 +26,7 @@
 #---
 #spring.config.activate.on-profile: local, test
 
-naver:
-  api:
-    base-url: https://openapi.naver.com
-    client-id: Wy8MTNOFiC_D3tcZKez9
-    client-secret: 9dqRO8eBgB
+
 
 #spring:
 #  datasource:
