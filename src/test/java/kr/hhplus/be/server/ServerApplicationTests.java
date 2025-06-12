@@ -1,8 +1,8 @@
 package kr.hhplus.be.server;
 
-import kr.hhplus.be.server.dto.RestaurantResponse;
+import kr.hhplus.be.server.domain.restaurant.Restaurant;
 import kr.hhplus.be.server.dto.RestaurantSearchRequest;
-import kr.hhplus.be.server.external.NaverApiClient;
+import kr.hhplus.be.server.infrastructure.external.NaverApiClient;
 import kr.hhplus.be.server.service.RestaurantService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,7 +49,7 @@ class ServerApplicationTests {
 
 
 
-		@Test
+	@Test
 	void shouldReturnResultsFromNaverApiClient() {
 		// 임의 값 설정
 		RestaurantSearchRequest request = new RestaurantSearchRequest();
@@ -58,13 +58,13 @@ class ServerApplicationTests {
 		request.setOffset(1);
 		request.setSize(10);
 
-		List<RestaurantResponse> mockResponse = List.of(
-				new RestaurantResponse("맛집 1", "한식", "서울 강남구 대치동", "x-123", "y-456"),
-				new RestaurantResponse("맛집 2", "양식", "서울 강남구 논현동", "x-135", "y-495")
+		List<Restaurant> mockResponse = List.of(
+				new Restaurant("맛집 1", "한식", "서울 강남구 대치동", "x-123", "y-456"),
+				new Restaurant("맛집 2", "양식", "서울 강남구 논현동", "x-135", "y-495")
 		);
 
 		Mockito.when(naverApiClient.search(request)).thenReturn(mockResponse);;
-		List<RestaurantResponse> result = restaurantService.searchRestaurants(request);
+		List<Restaurant> result = restaurantService.searchRestaurants(request);
 
 		assertThat(result).isEqualTo(mockResponse);
 		assertThat(result).hasSize(2);
