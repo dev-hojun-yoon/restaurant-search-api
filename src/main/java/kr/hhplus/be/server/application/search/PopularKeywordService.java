@@ -2,6 +2,9 @@ package kr.hhplus.be.server.application.search;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
+
 import kr.hhplus.be.server.domain.keyword.PopularKeyword;
 import kr.hhplus.be.server.domain.keyword.PopularKeywordRepository;
 import lombok.NoArgsConstructor;
@@ -13,6 +16,7 @@ public class PopularKeywordService {
     private final PopularKeywordRepository popularKeywordRepository;
     private final PopularKeywordMemoryService memoryService;
 
+    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
     public List<PopularKeyword> findTop(int limit) {
         return popularKeywordRepository.findTopKeywords(limit);
     }
