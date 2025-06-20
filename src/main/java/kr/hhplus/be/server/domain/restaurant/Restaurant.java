@@ -4,10 +4,10 @@ public class Restaurant {
     private String title;
     private String category;
     private String address;
-    private int mapx;
-    private int mapy;
+    private String mapx;
+    private String mapy;
 
-    public Restaurant(String title, String category, String address, int mapx, int mapy) {
+    public Restaurant(String title, String category, String address, String mapx, String mapy) {
         this.title = title;
         this.category = category;
         this.address = address;
@@ -27,11 +27,19 @@ public class Restaurant {
         return address;
     }
 
-    public int getMapx() {
-        return mapx;
+    public double getMapx() {
+        return Double.parseDouble(mapx);
     }
 
-    public int getMapy() {
-        return mapy;
+    public double getMapy() {
+        return Double.parseDouble(mapy);
     }
+
+    @Override
+    public String toString() {
+        return "Restaurant [title=" + title + ", category=" + category + ", address=" + address + ", mapx=" + mapx
+                + ", mapy=" + mapy + "]";
+    }
+
+    
 }
