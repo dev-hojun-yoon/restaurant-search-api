@@ -28,6 +28,7 @@ public class RestaurantService {
     private final KakaoApiClient kakaoApiClient; // KakaoApiClient 의존성 추가
     private final RestaurantRepository repository;
     private final PopularKeywordService keywordService;
+    private final PopularKeywordRepository keywordRepository;
 
     // 블로킹 I/O (DB 접근)을 위한 별도의 스케줄러
     private final Scheduler jdbcScheduler = Schedulers.boundedElastic();
@@ -128,7 +129,9 @@ public class RestaurantService {
             try {
                 log.info("DB에 {} 개 결과 저장 및 키워드 카운트 업데이트", restaurants.size());
                 repository.save(restaurants);
-                keywordService.increaseCount(query);
+                // keywordService.increaseCount(query);
+                String region = keywordRepository.extractRegionFromKeyword(query);
+                keywordRepository.increaseCount(query, region);
                 log.info("DB 저장 완료");
             } catch (Exception e) {
                 log.error("DB 저장 중 오류 발생", e);
@@ -142,7 +145,9 @@ public class RestaurantService {
     private Mono<Void> increaseKeywordCount(String query) {
         return Mono.fromRunnable(() -> {
             try {
-                keywordService.increaseCount(query);
+                // keywordService.increaseCount(query);
+                String region = keywordRepository.extractRegionFromKeyword(query);
+                keywordRepository.increaseCount(query, region);
                 log.info("키워드 카운트 증가 완료: {}", query);
             } catch (Exception e) {
                 log.error("키워드 카운트 증가 중 오류 발생", e);
