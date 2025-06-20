@@ -47,19 +47,25 @@ public class PopularKeywordRepositoryImpl implements PopularKeywordRepository{
                     entity.getRegion()))
                 .collect(Collectors.toList());
     }
-    // @Override
-    // @Transactional
-    // public void increaseCount(String keyword, String region) {
-    //     PopularKeywordEntity entity = jpaPopularKeywordRepository.findByKeywordAndRegion(keyword, region)
-    //                             .orElseGet(() -> new PopularKeywordEntity(keyword, region));
 
-    //     entity.increaseCount();
+    @Override
+    @Transactional
+    public void increaseCount(String keyword, String region) {
+        int affectedRows = jpaPopularKeywordRepository.updatKeywordCount(keyword, region);
+        if (affectedRows == 0) {
+            // row 가 없을 시 Insert
+            jpaPopularKeywordRepository.save(new PopularKeywordEntity(keyword, region));
+        }
+        // PopularKeywordEntity entity = jpaPopularKeywordRepository.findByKeywordAndRegion(keyword, region)
+        //                         .orElseGet(() -> new PopularKeywordEntity(keyword, region));
+
+        // entity.increaseCount();
                                 
-    //     // Id 를 PK 값으로 지정하는 것은 어떤지 검토 필요
-    //     if (entity.getKeyword() == null) {
-    //         jpaPopularKeywordRepository.save(entity);
-    //     }
-    // }
+        // // Id 를 PK 값으로 지정하는 것은 어떤지 검토 필요
+        // if (entity.getKeyword() == null) {
+        //     jpaPopularKeywordRepository.save(entity);
+        // }
+    }
 
     @Override
     public List<PopularKeyword> findTopKeywords(int limit) {
