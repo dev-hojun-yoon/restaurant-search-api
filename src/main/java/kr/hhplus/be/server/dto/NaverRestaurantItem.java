@@ -19,15 +19,35 @@ public class NaverRestaurantItem {
         return address;
     }
 
-    public String getMapx() {
+    public String getMapX() {
         return mapx;
     }
 
-    public String getMapy() {
+    public String getMapY() {
         return mapy;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public void setMapx(String mapx) {
+        this.mapx = mapx;
+    }
+
+    public void setMapy(String mapy) {
+        this.mapy = mapy;
+    }
+
+    
 
 
 }
