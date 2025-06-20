@@ -3,14 +3,14 @@ package kr.hhplus.be.server.dto;
 import lombok.Data;
 import lombok.NonNull;
 
-@Data
+@Data // getter, setter, toString, equals, hashcode 등을 모두 포함
 public class RestaurantSearchRequest {
     @NonNull
     private String query;
 
     private String sort = "random";
     private int offset = 1;
-    private int size = 10;
+    private int size = 5;
 
     public RestaurantSearchRequest() {}
 
