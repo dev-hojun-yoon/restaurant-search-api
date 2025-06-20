@@ -37,11 +37,13 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.springframework.boot:spring-boot-configuration-processor")
+	implementation("mysql:mysql-connector-java:8.0.33")
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
 
 	// Lombok
 	compileOnly("org.projectlombok:lombok:1.18.30")
+	annotationProcessor("org.projectlombok:lombok:1.18.30")
 
     // DB
 	runtimeOnly("com.mysql:mysql-connector-j")
