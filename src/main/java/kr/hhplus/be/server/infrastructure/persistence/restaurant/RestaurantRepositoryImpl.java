@@ -22,8 +22,17 @@ public class RestaurantRepositoryImpl implements RestaurantRepository{
             .collect(Collectors.toList());
 
         jpaRepository.saveAll(entities);
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'save'");
     }
-    
+
+    // DB 에서 쿼리로 맛집을 검색하는 기능의 구현부
+    @Override
+    public List<Restaurant> findByQuery(String query) {
+        // 1. JpaRepository 를 호출하여 Entity 리스트를 가져옴
+        List<RestaurantEntity> entities = jpaRepository.findByTitleContainingIgnoreCase(query);
+
+        // 2. Entity 리스트를 Domain (DTO) 객체 리스트로 변환
+        return entities.stream()
+                .map(RestaurantEntity::toDomain) // 엔티티를 도메인 객체로 변환
+                .collect(Collectors.toList());
+    }    
 }
