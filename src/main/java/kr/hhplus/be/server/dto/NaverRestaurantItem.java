@@ -46,8 +46,4 @@ public class NaverRestaurantItem {
     public void setMapy(String mapy) {
         this.mapy = mapy;
     }
-
-    
-
-
 }
