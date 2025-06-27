@@ -27,6 +27,7 @@ public class PopularKeywordRepositoryImpl implements PopularKeywordRepository{
     private final JpaKeyRegionRepository jpaKeyRegionRepository;
     private final Set<String> regionCache = ConcurrentHashMap.newKeySet();
     private volatile boolean initialized = false;
+    private final Object initLock = new Object();
 
     @Override
     @Transactional
@@ -49,13 +50,13 @@ public class PopularKeywordRepositoryImpl implements PopularKeywordRepository{
     }
 
     @Override
-    @Transactional
     public void increaseCount(String keyword, String region) {
-        int affectedRows = jpaPopularKeywordRepository.updatKeywordCount(keyword, region);
-        if (affectedRows == 0) {
-            // row 가 없을 시 Insert
-            jpaPopularKeywordRepository.save(new PopularKeywordEntity(keyword, region));
-        }
+        jpaPopularKeywordRepository.upsertKeyword(keyword, region);
+        // int affectedRows = jpaPopularKeywordRepository.updatKeywordCount(keyword, region);
+        // if (affectedRows == 0) {
+        //     // row 가 없을 시 Insert
+        //     jpaPopularKeywordRepository.save(new PopularKeywordEntity(keyword, region));
+        // }
         // PopularKeywordEntity entity = jpaPopularKeywordRepository.findByKeywordAndRegion(keyword, region)
         //                         .orElseGet(() -> new PopularKeywordEntity(keyword, region));
 
@@ -70,7 +71,7 @@ public class PopularKeywordRepositoryImpl implements PopularKeywordRepository{
     @Override
     public List<PopularKeyword> findTopKeywords(int limit) {
         return jpaPopularKeywordRepository.findAllByOrderByCountDesc(PageRequest.of(0 , limit)).stream()
-                .map(e -> new PopularKeyword(e.getKeyword(), e.getCount()))
+                .map(e -> new PopularKeyword(e.getKeyword(), e.getCount(), e.getRegion()))
                 .toList();
     }
 
@@ -122,13 +123,21 @@ public class PopularKeywordRepositoryImpl implements PopularKeywordRepository{
 
     public String extractRegionFromKeyword(String keyword) {
         if (!initialized) {
-            loadRegionsToMemory();
+            synchronized (initLock) {
+                if (!initialized) {
+                    loadRegionsToMemory();        
+                }
+            }
+        }
+
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return "";
         }
 
         return regionCache.stream()
                 .filter(keyword::contains)
                 .findFirst()
-                .orElse(null);
+                .orElse("");
     }
     
 }
