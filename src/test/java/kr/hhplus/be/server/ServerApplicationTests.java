@@ -1,13 +1,19 @@
 package kr.hhplus.be.server;
 
 import kr.hhplus.be.server.application.search.RestaurantService;
+import kr.hhplus.be.server.application.search.RestaurantTransactionService;
+import kr.hhplus.be.server.domain.keyword.PopularKeywordRepository;
 import kr.hhplus.be.server.domain.restaurant.Restaurant;
+import kr.hhplus.be.server.domain.restaurant.RestaurantRepository;
 import kr.hhplus.be.server.dto.RestaurantResponse;
 import kr.hhplus.be.server.dto.RestaurantSearchRequest;
 import kr.hhplus.be.server.infrastructure.external.ApiCallResult;
+import kr.hhplus.be.server.infrastructure.external.KakaoApiClient;
 import kr.hhplus.be.server.infrastructure.external.NaverApiClient;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,32 +32,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
-//@SpringBootTest
+// @SpringBootTest
 @ExtendWith(MockitoExtension.class)
 class ServerApplicationTests {
-
-//	@TestConfiguration
-//	static class TestConfig {
-//		@Bean
-//		@Primary
-//		public NaverApiClient naverApiClient() {
-//			return Mockito.mock(NaverApiClient.class);
-//		}
-//	}
-
-//	@Autowired
-//	private NaverApiClient naverApiClient;
-//
-//	@Autowired
-//	private RestaurantService restaurantService;
-
+	// @Test
+	// void contextLoads() {
+		
+	// }
 	@Mock
 	private NaverApiClient naverApiClient;
 
+	@Mock
+    private KakaoApiClient kakaoApiClient;
+
+    @Mock
+    private RestaurantRepository restaurantRepository;
+    
+    @Mock
+    private PopularKeywordRepository keywordRepository;
+
+    @Mock
+    private RestaurantTransactionService transactionService;
+
 	@InjectMocks
 	private RestaurantService restaurantService;
-
-
 
 	@Test
 	void shouldReturnResultsFromNaverApiClient() {
@@ -69,13 +73,14 @@ class ServerApplicationTests {
 		
 		ApiCallResult mockResult = new ApiCallResult(mockResponse, true, null, "Naver");
 		Mockito.when(naverApiClient.search(request)).thenReturn(Mono.just(mockResult));
-		Mono<RestaurantResponse> result = restaurantService.searchRestaurants(request);
+		// Mono<RestaurantResponse> result = restaurantService.searchRestaurants(request);
 
-		assertThat(result).isEqualTo(mockResponse);
-		// assertThat(result).hasSize(2);
-//		assertThat(result.get(0)).isEqualTo(mockResponse.get(0));
-
-
+		// assertThat(result).isEqualTo(mockResponse);
+		StepVerifier.create(restaurantService.searchRestaurants(request))
+			.expectNextMatches(response -> {
+				System.out.println("Response: " + response); // 디버깅용
+				return response.getRestaurants().size() == 2 && response.isSuccess();
+			})
+			.verifyComplete();
 	}
-
 }
