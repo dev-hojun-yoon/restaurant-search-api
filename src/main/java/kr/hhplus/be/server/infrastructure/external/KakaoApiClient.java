@@ -35,6 +35,7 @@ public class KakaoApiClient extends AbstractApiClient<KakaoApiResponse, KakaoApi
         return builder.path("/v2/local/search/keyword.json")
                 .queryParam("query", request.getQuery())
                 .queryParam("category_group_code", "FD6")
+                .queryParam("page", request.getOffset())
                 .queryParam("size", 5); // 예시
     }
 
