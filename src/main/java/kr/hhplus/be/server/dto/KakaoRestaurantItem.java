@@ -37,6 +37,4 @@ public class KakaoRestaurantItem {
     public void setY(String y) {
         this.y = y;
     }
-
-       
 }
