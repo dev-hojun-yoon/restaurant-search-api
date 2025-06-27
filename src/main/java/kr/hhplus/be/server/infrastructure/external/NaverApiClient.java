@@ -32,8 +32,11 @@ public class NaverApiClient extends AbstractApiClient<NaverApiResponse, NaverApi
 
     @Override
     protected UriComponentsBuilder buildUriDetails(UriComponentsBuilder builder, RestaurantSearchRequest request) {
+        System.out.println(request.toString());
         return builder.path("/v1/search/local.json")
                 .queryParam("query", request.getQuery())
+                .queryParam("sort", request.getSort())
+                .queryParam("start", (request.getOffset() - 1) * 5 + 1)
                 .queryParam("display", 5); // 예시
     }
 
