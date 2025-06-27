@@ -38,6 +38,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.springframework.boot:spring-boot-configuration-processor")
 	implementation("mysql:mysql-connector-java:8.0.33")
+	implementation("org.springframework.boot:spring-boot-starter-data-redis")
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
 
