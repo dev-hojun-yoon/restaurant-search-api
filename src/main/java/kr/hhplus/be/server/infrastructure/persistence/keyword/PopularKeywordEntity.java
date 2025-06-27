@@ -6,13 +6,15 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "popular_keyword")
+@NoArgsConstructor
 public class PopularKeywordEntity {
    
     @Id
-    // @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
@@ -21,7 +23,7 @@ public class PopularKeywordEntity {
     @Column(nullable = false)
     private long count;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String region;
     
     public PopularKeywordEntity(String keyword, String region) {
