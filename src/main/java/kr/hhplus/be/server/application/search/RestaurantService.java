@@ -2,6 +2,7 @@ package kr.hhplus.be.server.application.search;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import kr.hhplus.be.server.dto.RestaurantSearchRequest;
 import kr.hhplus.be.server.infrastructure.external.ApiCallResult;
 import kr.hhplus.be.server.infrastructure.external.KakaoApiClient;
 import kr.hhplus.be.server.infrastructure.external.NaverApiClient;
+import kr.hhplus.be.server.infrastructure.external.RedisLockManager;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +35,7 @@ public class RestaurantService {
     private final RestaurantRepository repository;
     private final PopularKeywordRepository keywordRepository;
     private RestaurantTransactionService transactionService;
+    private RedisLockManager redisLockManager;
 
     // 블로킹 I/O (DB 접근)을 위한 별도의 스케줄러
     private final Scheduler jdbcScheduler = Schedulers.boundedElastic();
@@ -93,12 +96,25 @@ public class RestaurantService {
     // }
 
     public Mono<RestaurantResponse> searchRestaurants(RestaurantSearchRequest request) {
-        return validateRequest(request)
+        String lockKey = "lock:search" + request.getQuery();
+        String lockValue = UUID.randomUUID().toString();
+
+        boolean isLockAcquired = redisLockManager.lock(lockKey, lockValue);
+        if (!isLockAcquired) {
+            throw new IllegalStateException("동일한 검색이 이미 진행 중이다. 잠시 후 시도해주세요.");
+        }
+
+        try {
+            return validateRequest(request)
                 .flatMap(this::searchWithFallback)
                 .flatMap(tuple -> processSearchResult(tuple.getT1(), tuple.getT2(), request.getQuery()))
                 .doOnSuccess(response -> log.info("검색 완료: {}", response.getMessage()))
                 .doOnError(e -> log.error("에러 발생", e))
                 .onErrorReturn(RestaurantResponse.failure("서비스 중 오류가 발생했습니다."));
+        } finally {
+            redisLockManager.unlock(lockKey, lockValue);
+        }
+        
     }
 
     private Mono<RestaurantSearchRequest> validateRequest(RestaurantSearchRequest request) {
