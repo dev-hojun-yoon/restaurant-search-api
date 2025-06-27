@@ -55,6 +55,8 @@ dependencies {
 	testImplementation("org.testcontainers:mysql")
 	testImplementation("org.mockito:mockito-core:5.2.0")
 	testImplementation("org.assertj:assertj-core:3.25.3")
+	testImplementation("io.projectreactor:reactor-test")
+	testImplementation("org.junit.jupiter:junit-jupiter")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
