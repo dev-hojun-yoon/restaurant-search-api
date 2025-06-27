@@ -29,7 +29,7 @@ public class PopularKeywordService {
         return new ArrayList<>(popularKeywordRepository.getAllRegions());
     }
 
-    public void increaseCount(String keyword) {
-        memoryService.increaseCount(keyword);
-    }
+    // public void increaseCount(String keyword) {
+    //     memoryService.increaseCount(keyword);
+    // }
 }
