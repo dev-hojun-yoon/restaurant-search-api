@@ -13,12 +13,18 @@ public interface JpaPopularKeywordRepository extends JpaRepository<PopularKeywor
     List<PopularKeywordEntity> findAllByOrderByCountDesc(Pageable pageable);
 
     // 특정 지역의 인기 키워드 조회.. 위 optional 에서는 부족한지?
-    @Query("SELECT p.keyword, p.count FROM PopularKeywordEntity p" + 
+    @Query("SELECT p.keyword, p.count FROM PopularKeywordEntity p " + 
            "WHERE p.region = :region ORDER BY p.count DESC")
-    List<Object[]> findTopKeywordByRegion(String region, Pageable pageable);
+    List<Object[]> findTopKeywordByRegion(@Param("region") String region, Pageable pageable);
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("UPDATE PopularKeywordEntity p SET p.count = p.count + 1" + 
-           "WHERE p.keyword = :keyword AND p.region = :region")
-    int updatKeywordCount(@Param("keyword") String keyword, @Param("region") String region);
+    // (keyword, region) 조합에 반드시 unique 제약조건이 있어야 on duplicate key 가 작동함.
+    // ALTER TABLE popular_keyword ADD CONSTRAINT uq_keyword_region UNIQUE(keyword, region);
+    @Modifying
+    @Query(
+        value = "INSERT INTO popular_keyword (keyword, region, count) " + 
+                "VALUES (:keyword, :region, 1) " +
+                "ON DUPLICATE KEY UPDATE count = count + 1",
+        nativeQuery = true
+    )
+    int upsertKeyword(@Param("keyword") String keyword, @Param("region") String region);
 }
