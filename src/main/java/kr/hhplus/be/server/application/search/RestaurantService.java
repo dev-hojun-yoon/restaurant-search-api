@@ -17,6 +17,7 @@ import kr.hhplus.be.server.infrastructure.external.ApiCallResult;
 import kr.hhplus.be.server.infrastructure.external.KakaoApiClient;
 import kr.hhplus.be.server.infrastructure.external.NaverApiClient;
 import kr.hhplus.be.server.infrastructure.external.RedisLockManager;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -28,32 +29,21 @@ import reactor.util.function.Tuples;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class RestaurantService {
     
     private final NaverApiClient naverApiClient;
     private final KakaoApiClient kakaoApiClient; // KakaoApiClient 의존성 추가
     private final RestaurantRepository repository;
     private final PopularKeywordRepository keywordRepository;
-    private RestaurantTransactionService transactionService;
-    private RedisLockManager redisLockManager;
+    private final RestaurantTransactionService transactionService;
+    private final RedisLockManager redisLockManager;
 
     // 블로킹 I/O (DB 접근)을 위한 별도의 스케줄러
     private final Scheduler jdbcScheduler = Schedulers.boundedElastic();
     private final Scheduler apiScheduler = Schedulers.parallel();
 
-    public RestaurantService(
-        NaverApiClient naverApiClient,
-        KakaoApiClient kakaoApiClient,
-        RestaurantRepository repository,
-        PopularKeywordRepository keywordRepository,
-        RestaurantTransactionService transactionService
-    ) {
-        this.naverApiClient = naverApiClient;
-        this.kakaoApiClient = kakaoApiClient;
-        this.repository = repository;
-        this.keywordRepository = keywordRepository;
-        this.transactionService = transactionService;
-    }
+
 
     /*
      * 맛집 검색하고, 검색 키워드 및 결과를 DB에 저장한다.
@@ -177,58 +167,6 @@ public class RestaurantService {
                         return Mono.just(ApiCallResult.failure("naver", "naver api 실패"));
                     }
                 });
-        // return naverApiClient.search(request)
-        //         .subscribeOn(apiScheduler)
-        //         .flatMap(naverResult -> {
-        //             if (naverResult.hasResults()) {
-        //                 return Mono.just(naverResult);
-        //             } else if (naverResult.isSuccess()) {
-        //                 // 성공했지만 결과 없음
-        //                 return kakaoApiClient.search(request)
-        //                         .subscribeOn(apiScheduler)
-        //                         .filter(ApiCallResult::hasResults)
-        //                         .switchIfEmpty(Mono.just(naverResult));
-        //             } else {
-        //                 return kakaoApiClient.search(request)
-        //                         .subscribeOn(apiScheduler)
-        //                         .flatMap(kakaoResult -> {
-        //                             if (kakaoResult.hasResults() || kakaoResult.isSuccess()) {
-        //                                 return Mono.just(kakaoResult);
-        //                             } else {
-        //                                 return Mono.just(ApiCallResult.failure("ALL APIS", "All API 모두 실패"));
-        //                             }
-        //                         });
-        //             }
-        //         });
-        // Mono<ApiCallResult> naverCall = naverApiClient.search(request)
-        //     .subscribeOn(apiScheduler);
-
-        // Mono<ApiCallResult> kakaoCall = kakaoApiClient.search(request)
-        //     .subscribeOn(apiScheduler);
-
-        // // 두 API 를 동시에 호출하고 첫번째 성공 결과를 반환
-        // return Mono.firstWithValue(
-        //     naverCall.filter(ApiCallResult::hasResults),
-        //     kakaoCall.filter(ApiCallResult::hasResults)
-        // )
-        // .switchIfEmpty(
-        //     // 둘다 결과가 없으면 둘 중 하나라도 성공한 것을 반환 (빈 결과라도)
-        //     Mono.firstWithValue(
-        //         naverCall.filter(ApiCallResult::isSuccess),
-        //         kakaoCall.filter(ApiCallResult::isSuccess)
-        //     )
-        // )
-        // .switchIfEmpty(
-        //     // 둘다 실패한 경우
-        //     Mono.zip(naverCall, kakaoCall)
-        //         .map(tuple -> {
-        //             ApiCallResult naver = tuple.getT1();
-        //             ApiCallResult kakao = tuple.getT2();
-        //             log.warn("모든 외부 API 실패 // Naver: {}, Kakao: {}", naver.getErrorMessage(), kakao.getErrorMessage());
-        //             return ApiCallResult.failure("ALL APIS", "모든 외부 API 호출 실패");
-        //         })
-        // );
-
     }
 
     // DB 에서 검색
