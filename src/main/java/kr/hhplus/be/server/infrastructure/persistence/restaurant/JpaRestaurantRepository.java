@@ -9,10 +9,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface JpaRestaurantRepository extends JpaRepository<RestaurantEntity, Long> {    
-    @Modifying
+    
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value = """
-            INSERT INTO restaurant (road_address, title, category, mapx, mapy)
-            VALUES (:roadAddress, :title, :category, :mapx, :mapy)
+            INSERT INTO restaurant (title, category, road_address, mapx, mapy)
+            VALUES (:title, :category, :roadAddress, :mapx, :mapy)
             ON DUPLICATE KEY UPDATE
                 title = VALUES(title),
                 category = VALUES(category),
@@ -33,7 +34,7 @@ public interface JpaRestaurantRepository extends JpaRepository<RestaurantEntity,
     // List<RestaurantEntity> findByTitleContainingIgnoreCase(String query);
 
     @Query(
-        value = "SELECT * FROM restaurant WHERE MATCH(title) AGAINST (:query IN BOOLEAN MODE)",
+        value = "SELECT * FROM restaurant WHERE title LIKE %:query%",
         nativeQuery = true
     )
     List<RestaurantEntity> searchByFullText(@Param("query") String query);
