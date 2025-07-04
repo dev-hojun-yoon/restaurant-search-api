@@ -14,25 +14,29 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
-@Entity(name = "restaurant")
-@Table(
-    name = "restaurant",
-    indexes = @Index(name = "ft_title", columnList = "title")
-)
+@Entity
+@Table(name = "restaurant")
 @AllArgsConstructor
 @NoArgsConstructor
 public class RestaurantEntity {
+    
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "title")
     private String title;
 
+    @Column(name = "category")
     private String category;
+
+    @Column(name = "road_address")
     private String roadAddress;
+
+    @Column(name = "mapx")
     private double mapX;
+
+    @Column(name = "mapy")
     private double mapY;
 
     public void setTitle(String title) {
