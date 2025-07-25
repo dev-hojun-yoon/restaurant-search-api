@@ -40,16 +40,6 @@ public class Controller {
         // 그 결과를 받아 ResponseEntity 를 감싸주면 된다.
         return restaurantService.searchRestaurants(request)
                 .map(ResponseEntity::ok); // .map(response -> ResponseEntity.ok(response)) 와 동일한 의미
-        
-        // 비동기 서비스 호출 (이전 버전)
-        // return restaurantService.searchRestaurants(request)
-        //         // Mono 내부의 List<Restaurant> 를 List<RestaurantResponse> 로 변환
-        //         .map(results -> results.stream()
-        //             .map(RestaurantResponse::new) // Restaurant -> RestaurantResponse
-        //             // .collect(Collectors.toList())
-        //         )
-        //         // 변환된 리스트를 ResponseEntity.ok() 로 감싸 최종적인 Mono<ResponseEntity> 를 생성
-        //         .map(ResponseEntity::ok);
     }
 
     @GetMapping("/keywords/popular")
@@ -66,15 +56,4 @@ public class Controller {
             List<PopularKeyword> results = popularKeywordService.findTopByRegion(limit, region);
             return ResponseEntity.ok(results);
     }
-    // @GetMapping("/keywords/popular")
-    // public ResponseEntity<List<PopularKeyword>> searchPopularKeywords(
-    //     @RequestParam(defaultValue = "") String region
-    // ) {
-    //     PopularKeywordRequest request = new PopularKeywordRequest();
-    //     request.setRegion(region);
-
-    //     List<PopularKeyword> results = popularKeywordService.findTop(10);
-    //     return ResponseEntity.ok(results);
-    // }
-
 }
