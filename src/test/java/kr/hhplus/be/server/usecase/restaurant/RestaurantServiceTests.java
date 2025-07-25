@@ -14,9 +14,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import kr.hhplus.be.server.application.search.PopularKeywordService;
 import kr.hhplus.be.server.application.search.RestaurantService;
 import kr.hhplus.be.server.application.search.RestaurantTransactionService;
-import kr.hhplus.be.server.domain.keyword.PopularKeywordRepository;
 import kr.hhplus.be.server.domain.restaurant.Restaurant;
 import kr.hhplus.be.server.domain.restaurant.RestaurantRepository;
 import kr.hhplus.be.server.dto.RestaurantSearchRequest;
@@ -24,10 +24,14 @@ import kr.hhplus.be.server.infrastructure.config.NaverApiProperties;
 import kr.hhplus.be.server.infrastructure.external.ApiCallResult;
 import kr.hhplus.be.server.infrastructure.external.KakaoApiClient;
 import kr.hhplus.be.server.infrastructure.external.NaverApiClient;
+import kr.hhplus.be.server.infrastructure.external.RedisLockManager;
 import kr.hhplus.be.server.infrastructure.persistence.restaurant.RestaurantEntity;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.withSettings;
 
@@ -44,22 +48,34 @@ public class RestaurantServiceTests {
     private RestaurantRepository restaurantRepository;
     
     @Mock
-    private PopularKeywordRepository keywordRepository;
+    private PopularKeywordService popularKeywordService;
 
     @Mock
     private RestaurantTransactionService transactionService;
 
+    @Mock
+    private RedisLockManager redisLockManager;
+
 	@InjectMocks
 	private RestaurantService restaurantService;
+
+    @BeforeEach
+    void setUp() {
+        Mockito.when(redisLockManager.acquireLock(anyString(), any())).thenReturn(Mono.just("lockValue"));
+        Mockito.when(redisLockManager.releaseLock(anyString(), anyString())).thenReturn(Mono.empty());
+
+        Mockito.when(popularKeywordService.extractRegionFromKeyword(anyString())).thenReturn("강남");
+        Mockito.doNothing().when(popularKeywordService).increaseCount(anyString(), anyString());
+        
+        // void 메서드이므로 doNothing() 사용
+        Mockito.doNothing().when(transactionService).saveResultsAndUpdateKeywordBlocking(anyList(), anyString());
+    }
 
     @Test
     @DisplayName("Naver_응답_성공")
     public void whenNaverSucceeds_thenReturnNaverResults() {
         RestaurantSearchRequest request = new RestaurantSearchRequest();
         request.setQuery("강남 맛집");
-        request.setSort("random");
-        request.setOffset(1);
-        request.setSize(10);
 
         List<Restaurant> mockData = List.of(
             new Restaurant("맛집", "한식", "주소", "123", "456")
@@ -77,9 +93,6 @@ public class RestaurantServiceTests {
     public void whenNaverFails_thenFallbackToKakao() {
         RestaurantSearchRequest request = new RestaurantSearchRequest();
         request.setQuery("강남 맛집");
-        request.setSort("random");
-        request.setOffset(1);
-        request.setSize(10);
 
         Mockito.when(naverApiClient.search(request)).thenReturn(Mono.error(new RuntimeException("Naver Error")));
         List<Restaurant> kakaoData = List.of(
@@ -98,9 +111,6 @@ public class RestaurantServiceTests {
     public void whenAllExternalFail_thenUseDatabase() {
         RestaurantSearchRequest request =  new RestaurantSearchRequest();
         request.setQuery("강남 맛집");
-        request.setSort("random");
-        request.setOffset(1);
-        request.setSize(10);
 
         Mockito.when(naverApiClient.search(request)).thenReturn(Mono.error(new RuntimeException("Naver Error")));
         Mockito.when(kakaoApiClient.search(request)).thenReturn(Mono.error(new RuntimeException("Kakao Error")));
@@ -110,7 +120,7 @@ public class RestaurantServiceTests {
         List<Restaurant> dbResults_toRestaurant = dbResults.stream()
                                                 .map(RestaurantEntity::toDomain)
                                                 .collect(Collectors.toList());
-        Mockito.when(restaurantRepository.findByQuery(Mockito.anyString())).thenReturn(dbResults_toRestaurant);
+        Mockito.when(restaurantRepository.findByQuery(anyString())).thenReturn(dbResults_toRestaurant);
 
         StepVerifier.create(restaurantService.searchRestaurants(request))
                 .expectNextMatches(response -> response.getRestaurants().get(0).getTitle().equals("롯데리아"))
