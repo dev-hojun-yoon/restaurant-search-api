@@ -39,6 +39,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-configuration-processor")
 	implementation("mysql:mysql-connector-java:8.0.33")
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
+	implementation("org.springframework.kafka:spring-kafka")
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
 
@@ -67,3 +68,4 @@ tasks.withType<Test> {
 	useJUnitPlatform()
 	systemProperty("user.timezone", "UTC")
 }
+
