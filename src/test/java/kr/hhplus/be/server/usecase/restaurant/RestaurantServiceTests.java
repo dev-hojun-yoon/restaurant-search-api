@@ -56,6 +56,9 @@ public class RestaurantServiceTests {
     @Mock
     private RedisLockManager redisLockManager;
 
+    @Mock
+    private kr.hhplus.be.server.kafka.KafkaProducerService kafkaProducerService;
+
 	@InjectMocks
 	private RestaurantService restaurantService;
 
@@ -69,6 +72,7 @@ public class RestaurantServiceTests {
         
         // void 메서드이므로 doNothing() 사용
         Mockito.doNothing().when(transactionService).saveResultsAndUpdateKeywordBlocking(anyList(), anyString());
+        Mockito.doNothing().when(kafkaProducerService).sendRestaurantSearchEvent(any());
     }
 
     @Test
