@@ -1,56 +1,27 @@
 spring:
- application:
-   name: hhplus
- profiles:
-   active: local
- datasource:
-   name: HangHaePlusDataSource
-   type: com.zaxxer.hikari.HikariDataSource
-   url: jdbc:mysql://localhost:3307/hhplus?useUnicode=true&useSSL=false&serverTimezone=Asia/Seoul&characterSetResults=utf8mb4&allowPublicKeyRetrieval=true
-   username: application
-   password: application
-   hikari:
-     maximum-pool-size: 3
-     connection-timeout: 10000
-     max-lifetime: 60000
-   driver-class-name: com.mysql.cj.jdbc.Driver
- jpa:
-   repositories:
-    enabled: true
-   open-in-view: false
-   generate-ddl: false
-   show-sql: false
-   hibernate:
-     ddl-auto: none
-   properties:
-     hibernate.timezone.default_storage: NORMALIZE_UTC
-     hibernate.jdbc.time_zone: UTC
-     hibernate:
-       dialect: org.hibernate.dialect.MySQL8Dialect
+  datasource:
+    url: jdbc:mysql://localhost:3307/hhplus?useSSL=false&allowPublicKeyRetrieval=true
+    username: application
+    password: application
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
   redis:
     host: localhost
     port: 6379
-
-logging:
-  level:
-    kr.hhplus.be.server.integration: DEBUG
-    org.springframework.web: DEBUG
-# ---
-# spring.config.activate.on-profile: local, test
-
-naver:
-  api:
-    base-url: https://openapi.naver.com
-    client-id: Wy8MTNOFiC_D3tcZKez9
-    client-secret: 9dqRO8eBgB
-
-kakao:
-  api:
-    base-url: https://dapi.kakao.com
-    rest-api-key: 56c5a0a19f3786ba7be887f955ff5470
-
-# spring:
-#  datasource:
-#    url: jdbc:mysql://localhost:3306/hhplus?characterEncoding=UTF-8&serverTimezone=UTC
-#    username: application
-#    password: application
+  kafka:
+    bootstrap-servers: localhost:9092,localhost:9093,localhost:9094
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: restaurant-search-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
