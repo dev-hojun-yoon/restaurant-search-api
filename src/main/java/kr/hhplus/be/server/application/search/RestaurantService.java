@@ -3,13 +3,13 @@ package kr.hhplus.be.server.application.search;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import kr.hhplus.be.server.domain.restaurant.Restaurant;
 import kr.hhplus.be.server.domain.restaurant.RestaurantRepository;
 import kr.hhplus.be.server.dto.RestaurantResponse;
 import kr.hhplus.be.server.dto.RestaurantSearchRequest;
+import kr.hhplus.be.server.kafka.KafkaProducerService;
 import kr.hhplus.be.server.event.RestaurantSearchEvent;
 import kr.hhplus.be.server.infrastructure.external.ApiCallResult;
 import kr.hhplus.be.server.infrastructure.external.KakaoApiClient;
@@ -34,7 +34,7 @@ public class RestaurantService {
     private final PopularKeywordService popularKeywordService; // 변경
     private final RestaurantTransactionService transactionService;
     private final RedisLockManager redisLockManager;
-    private final ApplicationEventPublisher eventPublisher;
+    private final KafkaProducerService kafkaProducerService;
 
     private final Scheduler jdbcScheduler = Schedulers.boundedElastic();
     private final Scheduler apiScheduler = Schedulers.parallel();
@@ -96,7 +96,7 @@ public class RestaurantService {
 
         return writeTask.thenReturn(RestaurantResponse.success(restaurants, dataSource))
                 .doOnSuccess(response -> {
-                    eventPublisher.publishEvent(new RestaurantSearchEvent(this, query, userId, restaurants, dataSource));
+                    kafkaProducerService.sendRestaurantSearchEvent(new RestaurantSearchEvent(this, query, userId, restaurants, dataSource));
                 });
     }
 
