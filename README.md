@@ -1,13 +1,23 @@
-## 프로젝트
+## 프로젝트 소개
+맛집 조회 API 서비스를 Spring Boot 를 기반으로 구현하였습니다. 
+
+외부 Open API (kakao, naver) 를 이용한 맛집 검색 서비스이며, 키워드를 이용해 검색을 할 수 있습니다.
+인기 키워드 기능을 제공해서 사람들이 현재 관심 있는 맛집이 무엇인지 알 수 있습니다.
+
+## 설계사항
+docs 에 정리가 되어 있으며, 다음 문서들을 정리하였습니다.
+
+* API Interface
+* ERD 데이터베이스 모델링
+* Flow Chart
+* Infra 구조도
+* 서비스 요구사항 정의
+* 시퀀스 다이어그램
+
+## 구현 내용
+* 특정 외부 API 가 동작하지 않았을 때, 다른 API 로 전환하고 2개의 외부 API 모두 동작하지 않아도
+기능이 문제 없도록 구현하였습니다.
+* 
 
 ## Getting Started
 
-### Prerequisites
-
-#### Running Docker Containers
-
-`local` profile 로 실행하기 위하여 인프라가 설정되어 있는 Docker 컨테이너를 실행해주셔야 합니다.
-
-```bash
-docker-compose up -d
-```
