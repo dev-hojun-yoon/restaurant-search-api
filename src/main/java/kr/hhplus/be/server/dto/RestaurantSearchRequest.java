@@ -7,6 +7,7 @@ import lombok.NonNull;
 public class RestaurantSearchRequest {
     @NonNull
     private String query;
+    private String userId;
 
     private String sort = "random";
     private int offset = 1;
@@ -16,6 +17,10 @@ public class RestaurantSearchRequest {
 
     public @NonNull String getQuery() {
         return query;
+    }
+
+    public String getUserId() {
+        return userId;
     }
 
     public String getSort() {
@@ -32,6 +37,10 @@ public class RestaurantSearchRequest {
 
     public void setQuery(@NonNull String query) {
         this.query = query;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public void setSort(String sort) {
