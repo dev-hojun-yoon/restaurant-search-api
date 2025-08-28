@@ -34,5 +34,7 @@ docs 에 정리가 되어 있으며, 다음 문서들을 정리하였습니다.
 * 동일한 Service 파일 내에 @Transactional 트랜잭션 메소드를 호출하면 오류가 발생 => Spring 은 AOP 를 사용해, 트랜잭션을 구현하고 있고, 트랜잭션 설정 시 내부적으로 생성되는 프록시가 있어 동일한 파일 내에서는 트랜잭션 전파가 안되는 문제가 발생할 수 있음 => 트랜잭션 전용 파일을 생성하여 해결 // @Transactional 뿐 아니라 @Cacheable 같은 AOP 어노테이션도 동일한 특성임 // 이벤트 기반으로 설계하거나 // @Async + ComputableFuture 조합으로도 가능
 * 책임 연쇄 패턴 (Chain of Responsibility)
   * 클라이언트 요청에 대한 세세한 처리를 하나의 객체가 다 처리하는 게 아닌, 여러 처리 객체로 나누고, 사슬처럼 연결해 집합 안에서 연쇄적으로 처리하는 행동 패턴
+ 
+ 
 ## Getting Started
-
+* https://github.com/dev-hojun-yoon/restaurant-search-api/blob/main/docs/api_interface.md 문서를 참고해서 API 호출이 가능합니다.
