@@ -44,10 +44,14 @@ public class PopularKeywordEntity {
         return region;
     }
 
-    public void increaseCount() {
-        this.count++;
-    }
+    // public void increaseCount() {
+    //     this.count++;
+    // }
 
+    public void increment(long delta) {
+        this.count += delta;
+    }
+    
     public void setId(Long id) {
         this.id = id;
     }

@@ -65,6 +65,7 @@ class ServerApplicationTests {
 		request.setSort("random");
 		request.setOffset(1);
 		request.setSize(10);
+		request.setUserId("testUser");
 
 		List<Restaurant> mockResponse = List.of(
 				new Restaurant("맛집 1", "한식", "서울 강남구 대치동", "123", "456"),

@@ -8,7 +8,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.PostConstruct;
 import kr.hhplus.be.server.domain.keyword.PopularKeyword;
 import kr.hhplus.be.server.domain.keyword.PopularKeywordRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,40 +24,33 @@ public class PopularKeywordMemoryService {
     private final ConcurrentHashMap<String, Long> memoryKeywordMap = new ConcurrentHashMap<>();
     private volatile boolean initialized = false;
 
-    @PostConstruct
-    public void initialize() {
-        loadFromDatabase();
-    }
-
-    private void loadFromDatabase() {
+    public void initializeMemoryMap(List<PopularKeyword> dbKeywords) {
         try {
-            List<PopularKeyword> dbKeywords = popularKeywordRepository.findAllKeywords();
-            
             for (PopularKeyword keyword : dbKeywords) {
                 String key = createMapKey(keyword.getKeyword(), keyword.getRegion());
                 memoryKeywordMap.put(key, keyword.getCount());
             }
             
             initialized = true;
-            log.info("Loaded {} keywords from database to memory", memoryKeywordMap.size());
+            log.info("Loaded {} keywords from database to memory", dbKeywords.size());
         } catch (Exception e) {
-            log.error("Failed to load keywords from database", e);
+            log.error("Failed to load keywords from database to memory", e);
         }
     }
 
-    // 키워드 카운트 증가 (메모리에서)
-    public void increaseCount(String keyword) {
-        String region = popularKeywordRepository.extractRegionFromKeyword(keyword);
-        String mapKey = createMapKey(keyword, region);
-
-        memoryKeywordMap.merge(mapKey, 1L, Long::sum);
-        log.debug("Increased keyword count in memory: {} -> {}", mapKey, memoryKeywordMap.get(mapKey));
+    public void increaseCount(String keyword, String region) {
+        if (!initialized) {
+            log.warn("Memory map is not initialized yet. Skipping increaseCount.");
+            return;
+        }
+        String key = createMapKey(keyword, region);
+        memoryKeywordMap.merge(key, 1L, Long::sum);
     }
 
     // 메모리 데이터를 DB에 동기화 (스케줄러에서 호출)
     @Scheduled(fixedRate = 300000) // 5분
     public void syncToDatabase() {
-        if (!initialized | memoryKeywordMap.isEmpty()) {
+        if (!initialized || memoryKeywordMap.isEmpty()) {
             return;
         }
 
@@ -94,3 +86,4 @@ public class PopularKeywordMemoryService {
         return new String[]{keyword, region};
     }
 }
+
